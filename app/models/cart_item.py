@@ -22,3 +22,7 @@ class CartItemCreate(CartItemBase):
 # Schema Envoltorio para recibir múltiples items en una sola petición
 class CartBulkCreate(SQLModel):
     items: list[CartItemCreate]
+
+# Schema para Actualizar (PATCH)
+class CartItemUpdate(SQLModel):
+    quantity: int = Field(ge=1)

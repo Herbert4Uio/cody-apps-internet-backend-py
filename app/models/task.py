@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime
 from sqlmodel import SQLModel, Field
 
 class TaskBase(SQLModel):
@@ -10,11 +11,13 @@ class TaskBase(SQLModel):
 class Task(TaskBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     ai_suggestion: Optional[str] = Field(default=None)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
     
 # Schema Público para Lectura
 class TaskPublic(TaskBase):
     id: int
     ai_suggestion: Optional[str] = None
+    created_at: datetime
 
 # Schema para Crear
 class TaskCreate(TaskBase):

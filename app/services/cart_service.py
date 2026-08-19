@@ -49,3 +49,40 @@ def add_to_cart(session: Session, cart_bulk: CartBulkCreate, user_id: int) -> li
         session.refresh(item)
         
     return updated_or_new_items
+
+def get_cart(session: Session, user_id: int) -> list[CartItem]:
+    statement = select(CartItem).where(CartItem.user_id == user_id)
+    return session.exec(statement).all()
+
+def update_cart_item(session: Session, item_id: int, user_id: int, quantity: int) -> CartItem:
+    item = session.get(CartItem, item_id)
+    if not item or item.user_id != user_id:
+        raise ValueError(f"El item del carrito con ID {item_id} no existe o no te pertenece.")
+        
+    product = session.get(Product, item.product_id)
+    if product and quantity > product.stock:
+        raise ValueError(f"Stock insuficiente para '{product.title}'. Disponible: {product.stock}.")
+        
+    item.quantity = quantity
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item
+
+def remove_from_cart(session: Session, item_id: int, user_id: int) -> bool:
+    item = session.get(CartItem, item_id)
+    if not item or item.user_id != user_id:
+        raise ValueError(f"El item del carrito con ID {item_id} no existe o no te pertenece.")
+        
+    session.delete(item)
+    session.commit()
+    return True
+
+def clear_cart(session: Session, user_id: int) -> bool:
+    statement = select(CartItem).where(CartItem.user_id == user_id)
+    items = session.exec(statement).all()
+    for item in items:
+        session.delete(item)
+    session.commit()
+    return True
+
